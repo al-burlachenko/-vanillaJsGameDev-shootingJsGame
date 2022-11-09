@@ -183,7 +183,7 @@ function drawGameOver() {
 }
 
 window.addEventListener("click", function (e) {
-  console.log(e.x, e.y);
+  // console.log(e.x, e.y);
   const detectPixelColor = collisionCanvasCtx.getImageData(e.x, e.y, 1, 1);
   // 1,1 - third and fourth argument - of area that we want to scan
   // get data with array [x,y,z,x]
@@ -200,7 +200,7 @@ window.addEventListener("click", function (e) {
       object.markedForDeletion = true;
       score++;
       explosions.push(new Explosions(object.x, object.y, object.width));
-      console.log(explosions);
+      // console.log(explosions);
     }
   });
 });
