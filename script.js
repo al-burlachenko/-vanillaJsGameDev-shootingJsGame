@@ -10,6 +10,7 @@ collisionCanvas.width = window.innerWidth;
 collisionCanvas.height = window.innerHeight;
 
 let score = 0;
+let gameOver = false;
 ctx.font = "50px Impact";
 
 let timeToNextRaven = 0;
@@ -63,11 +64,12 @@ class Raven {
       else this.frame++;
       this.timeSinceFlap = 0;
     }
+    if (this.x < 0 - this.width) gameOver = true;
     // console.log(deltatime);
   }
   draw() {
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    collisionCanvasCtx.fillStyle = this.color;
+    collisionCanvasCtx.fillRect(this.x, this.y, this.width, this.height);
     ctx.drawImage(
       this.image,
       this.frame * this.spriteWidth,
@@ -82,6 +84,47 @@ class Raven {
   }
 }
 
+let explosions = [];
+class Explosions {
+  constructor(x, y, size) {
+    this.image = new Image();
+    this.image.src = "boom.png";
+    this.spriteWidth = 200;
+    this.spriteHeight = 179;
+    this.size = size;
+    this.x = x;
+    this.y = y;
+    this.frame = 0;
+    this.sound = new Audio();
+    this.sound.src = "crow.mp3";
+    this.timeSinseLastFrame = 0;
+    this.frameInterval = 200;
+    this.markedForDeletion = false;
+  }
+  update(deltatime) {
+    if (this.frame === 0) this.sound.play();
+    this.timeSinseLastFrame += deltatime;
+    if (this.timeSinseLastFrame > this.frameInterval) {
+      this.frame++;
+      this.timeSinseLastFrame = 0;
+      if (this.frame > 5) this.markedForDeletion = true;
+    }
+  }
+  draw() {
+    ctx.drawImage(
+      this.image,
+      this.frame * this.spriteWidth,
+      0,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x,
+      this.y - this.size / 4,
+      this.size,
+      this.size
+    );
+  }
+}
+
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.fillText("Score: " + score, 50, 75);
@@ -89,32 +132,66 @@ function drawScore() {
   ctx.fillText("Score: " + score, 55, 80);
 }
 
+function drawGameOver() {
+  ctx.textAlign = "center";
+  ctx.fillStyle = "black";
+  ctx.fillText(
+    "GAME OVER, your score is " + score,
+    canvas.width / 2,
+    canvas.height / 2
+  );
+  ctx.fillStyle = "white";
+  ctx.fillText(
+    "GAME OVER, your score is " + score,
+    canvas.width / 2,
+    canvas.height / 2 + 5
+  );
+}
+
 window.addEventListener("click", function (e) {
   console.log(e.x, e.y);
-  const detectPixelColor = ctx.getImageData(e.x, e.y, 1, 1);
+  const detectPixelColor = collisionCanvasCtx.getImageData(e.x, e.y, 1, 1);
   // 1,1 - third and fourth argument - of area that we want to scan
-  console.log(detectPixelColor);
   // get data with array [x,y,z,x]
   // x,y,z - 0..255 rgb
   // x - opacity 0..255
+  const pc = detectPixelColor.data;
+  ravens.forEach((object, index) => {
+    if (
+      object.randomColors[0] == pc[0] &&
+      object.randomColors[1] == pc[1] &&
+      object.randomColors[2] == pc[2]
+    ) {
+      // collision detected by color
+      object.markedForDeletion = true;
+      score++;
+      explosions.push(new Explosions(object.x, object.y, object.width));
+      console.log(explosions);
+    }
+  });
 });
 
 function animate(timestamp) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  collisionCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
   let deltatime = timestamp - lastTime;
   lastTime = timestamp;
   timeToNextRaven += deltatime;
   if (timeToNextRaven > ravenInterval) {
     ravens.push(new Raven());
     timeToNextRaven = 0;
+    ravens.sort(function (a, b) {
+      return a.width - b.width;
+    });
   }
   drawScore();
-  [...ravens].forEach((object) => {
+  [...ravens, ...explosions].forEach((object) => {
     object.update(deltatime);
     object.draw();
   });
   ravens = ravens.filter((object) => !object.markedForDeletion);
-
-  requestAnimationFrame(animate);
+  explosions = explosions.filter((object) => !object.markedForDeletion);
+  if (!gameOver) requestAnimationFrame(animate);
+  else drawGameOver();
 }
 animate(0);
