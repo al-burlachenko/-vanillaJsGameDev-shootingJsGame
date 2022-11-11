@@ -8,7 +8,7 @@ import Explosions from "./utils/explosions.js"; // (x, y, size)
 import {
   canvas,
   ctx,
-  collisionCanvas,
+  // collisionCanvas,
   collisionCanvasCtx,
 } from "./utils/canvasSettings.js";
 
@@ -71,6 +71,7 @@ class Raven {
       if (this.frame > this.maxFrame) this.frame = 0;
       else this.frame++;
       this.timeSinceFlap = 0;
+
       if (this.hasTrail) {
         for (let i = 0; i < 5; i += 1) {
           particles.push(new Particle(this.x, this.y, this.width, this.color));
