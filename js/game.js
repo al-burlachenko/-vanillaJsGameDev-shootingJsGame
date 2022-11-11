@@ -22,6 +22,7 @@ let lastTime = 0;
 
 let score = 0;
 let gameOver = false;
+
 ctx.font = "50px Impact";
 
 class Raven {

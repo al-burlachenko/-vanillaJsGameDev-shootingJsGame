@@ -1,11 +1,6 @@
 /**@type {HTMLCanvasElement} */
 
-import {
-  canvas,
-  ctx,
-  collisionCanvas,
-  collisionCanvasCtx,
-} from "../utils/canvasSettings.js";
+import { ctx } from "../utils/canvasSettings.js";
 
 export default class Explosions {
   constructor(x, y, size) {
@@ -19,16 +14,16 @@ export default class Explosions {
     this.frame = 0;
     this.sound = new Audio();
     this.sound.src = "crow.mp3";
-    this.timeSinseLastFrame = 0;
+    this.timeSinceLastFrame = 0;
     this.frameInterval = 200;
     this.markedForDeletion = false;
   }
   update(deltatime) {
     if (this.frame === 0) this.sound.play();
-    this.timeSinseLastFrame += deltatime;
-    if (this.timeSinseLastFrame > this.frameInterval) {
+    this.timeSinceLastFrame += deltatime;
+    if (this.timeSinceLastFrame > this.frameInterval) {
       this.frame++;
-      this.timeSinseLastFrame = 0;
+      this.timeSinceLastFrame = 0;
       if (this.frame > 5) this.markedForDeletion = true;
     }
   }

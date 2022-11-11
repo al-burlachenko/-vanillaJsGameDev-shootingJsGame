@@ -1,11 +1,6 @@
 /**@type {HTMLCanvasElement} */
 
-import {
-  canvas,
-  ctx,
-  collisionCanvas,
-  collisionCanvasCtx,
-} from "../utils/canvasSettings.js";
+import { ctx } from "../utils/canvasSettings.js";
 
 export default class Particle {
   constructor(x, y, size, color) {
